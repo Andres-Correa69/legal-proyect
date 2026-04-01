@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>k6 Report - External Invoicing - 50 VUs</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; padding: 24px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { font-size: 28px; margin-bottom: 8px; color: #f8fafc; }
+    h2 { font-size: 20px; margin: 24px 0 12px; color: #f8fafc; }
+    h3 { font-size: 16px; margin: 16px 0 8px; color: #cbd5e1; }
+    .subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 24px; }
+    .status-badge { display: inline-block; padding: 4px 16px; border-radius: 20px; font-weight: 700; font-size: 14px; color: white; background: #22c55e; margin-left: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card { background: #1e293b; border-radius: 12px; padding: 20px; border: 1px solid #334155; }
+    .card-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .card-value { font-size: 28px; font-weight: 700; color: #f8fafc; }
+    .card-sub { font-size: 12px; color: #64748b; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+    th { text-align: left; padding: 12px 16px; background: #1e293b; color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #334155; }
+    td { padding: 10px 16px; border-bottom: 1px solid #1e293b; font-size: 14px; }
+    tr:hover td { background: #1e293b40; }
+    .pass { color: #22c55e; }
+    .fail { color: #ef4444; }
+    .warn { color: #f59e0b; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .tag-pass { background: #22c55e20; color: #22c55e; }
+    .tag-fail { background: #ef444420; color: #ef4444; }
+    .bar-bg { background: #334155; border-radius: 4px; height: 8px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+    .bar-green { background: #22c55e; }
+    .bar-red { background: #ef4444; }
+    .bar-yellow { background: #f59e0b; }
+    .section { background: #1e293b; border-radius: 12px; padding: 24px; border: 1px solid #334155; margin-bottom: 24px; }
+    .threshold-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #334155; }
+    .threshold-row:last-child { border-bottom: none; }
+    .percentile-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 12px; }
+    .percentile-item { text-align: center; padding: 12px 8px; background: #0f172a; border-radius: 8px; }
+    .percentile-label { font-size: 11px; color: #64748b; }
+    .percentile-value { font-size: 18px; font-weight: 600; color: #f8fafc; margin-top: 2px; }
+    footer { text-align: center; color: #475569; font-size: 12px; margin-top: 32px; padding-top: 16px; border-top: 1px solid #1e293b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <div>
+        <h1>k6 Performance Report <span class="status-badge">PASSED</span></h1>
+        <p class="subtitle">02/25/2026, 12:11:06 &nbsp;|&nbsp; External Invoicing - 50 VUs</p>
+      </div>
+    </div>
+
+    <!-- Métricas Principales -->
+    <div class="grid">
+      <div class="card">
+        <div class="card-label">Total Requests</div>
+        <div class="card-value">85</div>
+        <div class="card-sub">1.7 req/s</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Duración Media</div>
+        <div class="card-value">26.43s</div>
+        <div class="card-sub">min: 846ms / max: 41.81s</div>
+      </div>
+      <div class="card">
+        <div class="card-label">P95 Latencia</div>
+        <div class="card-value">41.32s</div>
+        <div class="card-sub">p(99): -</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Tasa de Error</div>
+        <div class="card-value fail">29.4%</div>
+        <div class="card-sub">25 fallidos de 85</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Checks Pasados</div>
+        <div class="card-value warn">70.6%</div>
+        <div class="card-sub">180 de 255</div>
+      </div>
+      <div class="card">
+        <div class="card-label">VUs / Iteraciones</div>
+        <div class="card-value">50</div>
+        <div class="card-sub">85 iteraciones</div>
+      </div>
+    </div>
+
+    <!-- Distribución de Latencia -->
+    <div class="section">
+      <h2>Distribución de Latencia</h2>
+      <div class="percentile-grid">
+        <div class="percentile-item">
+          <div class="percentile-label">min</div>
+          <div class="percentile-value">846ms</div>
+        </div>
+        <div class="percentile-item">
+          <div class="percentile-label">med</div>
+          <div class="percentile-value">28.15s</div>
+        </div>
+        <div class="percentile-item">
+          <div class="percentile-label">avg</div>
+          <div class="percentile-value">26.43s</div>
+        </div>
+        <div class="percentile-item">
+          <div class="percentile-label">p(90)</div>
+          <div class="percentile-value">41.31s</div>
+        </div>
+        <div class="percentile-item">
+          <div class="percentile-label">p(95)</div>
+          <div class="percentile-value">41.32s</div>
+        </div>
+        <div class="percentile-item">
+          <div class="percentile-label">p(99)</div>
+          <div class="percentile-value">-</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thresholds -->
+    
+
+    <!-- Checks por Grupo -->
+    <div class="section">
+      <h2>Checks Detallados</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Check</th>
+            <th>Estado</th>
+            <th style="width:200px">Resultado</th>
+            <th>Pasados</th>
+            <th>Fallidos</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>status 200</td>
+            <td><span class="tag tag-fail">FAIL</span></td>
+            <td>
+              <div class="bar-bg"><div class="bar-fill bar-yellow" style="width:70.58823529411765%"></div></div>
+            </td>
+            <td class="pass">60</td>
+            <td class="fail">25</td>
+          </tr>
+          <tr>
+            <td>success true</td>
+            <td><span class="tag tag-fail">FAIL</span></td>
+            <td>
+              <div class="bar-bg"><div class="bar-fill bar-yellow" style="width:70.58823529411765%"></div></div>
+            </td>
+            <td class="pass">60</td>
+            <td class="fail">25</td>
+          </tr>
+          <tr>
+            <td>factura válida DIAN</td>
+            <td><span class="tag tag-fail">FAIL</span></td>
+            <td>
+              <div class="bar-bg"><div class="bar-fill bar-yellow" style="width:70.58823529411765%"></div></div>
+            </td>
+            <td class="pass">60</td>
+            <td class="fail">25</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Datos de Red -->
+    <div class="section">
+      <h2>Red</h2>
+      <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
+        <div>
+          <div class="card-label">Datos Recibidos</div>
+          <div style="font-size: 20px; font-weight: 600; color: #f8fafc;">319.0 KB</div>
+          <div class="card-sub">6.2 KB/s</div>
+        </div>
+        <div>
+          <div class="card-label">Datos Enviados</div>
+          <div style="font-size: 20px; font-weight: 600; color: #f8fafc;">100.3 KB</div>
+          <div class="card-sub">2.0 KB/s</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Generado por k6 &nbsp;|&nbsp; Facturación Grupo CP &nbsp;|&nbsp; 02/25/2026, 12:11:06
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,389 @@
+{
+	"info": {
+		"_postman_id": "dian-proxy-api-collection",
+		"name": "DIAN Proxy API - Facturación Electrónica",
+		"description": "Endpoints externos para proyectos que necesitan usar los servicios DIAN de facturación electrónica.\n\nEste sistema actúa como puente/proxy: recibe peticiones, las envía a la API de la DIAN, y devuelve la respuesta. No guarda datos de ventas ni facturas.\n\n## Autenticación\nTodas las peticiones requieren el header:\n```\nX-API-Key: {tu_api_key}\n```\n\nGenerar una API key:\n```bash\nphp artisan api-client:create \"NombreProyecto\"\n```\n\n## Headers de Contexto (Opcionales)\nPara auditoría, se pueden enviar headers adicionales:\n- `X-Company-Name`: Nombre de la empresa\n- `X-Company-NIT`: NIT de la empresa\n- `X-User-Name`: Nombre del usuario\n- `X-User-Email`: Email del usuario\n\n## Rate Limit\n60 peticiones por minuto por API key.\n\n## Endpoints (8 total)\n1. GET /catalogs\n2. POST /company/register\n3. PUT /company/register\n4. PUT /company/environment\n5. POST /invoice\n6. POST /invoice/send-raw\n7. POST /credit-note\n8. POST /debit-note",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "api_key",
+			"value": "sk_TU_API_KEY_AQUI",
+			"type": "string"
+		},
+		{
+			"key": "dian_token",
+			"value": "TOKEN_DIAN_AQUI",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Catálogos DIAN",
+			"item": [
+				{
+					"name": "Obtener Catálogos DIAN",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-Key", "value": "{{api_key}}" },
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "X-Company-Name", "value": "Mi Empresa S.A.S", "disabled": true },
+							{ "key": "X-Company-NIT", "value": "900123456", "disabled": true },
+							{ "key": "X-User-Name", "value": "Juan Pérez", "disabled": true },
+							{ "key": "X-User-Email", "value": "admin@empresa.com", "disabled": true }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/external/v1/catalogs",
+							"host": ["{{base_url}}"],
+							"path": ["api", "external", "v1", "catalogs"]
+						},
+						"description": "Obtiene los catálogos DIAN:\n- type_document_identifications\n- type_organizations\n- type_regimes\n- type_liabilities\n- municipalities"
+					},
+					"response": [
+						{
+							"name": "Catálogos obtenidos",
+							"status": "OK",
+							"code": 200,
+							"header": [{ "key": "Content-Type", "value": "application/json" }],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"type_document_identifications\": [\n            { \"id\": 1, \"name\": \"Registro civil\", \"code\": \"11\" },\n            { \"id\": 6, \"name\": \"NIT\", \"code\": \"31\" }\n        ],\n        \"type_organizations\": [\n            { \"id\": 1, \"name\": \"Persona Jurídica\", \"code\": \"1\" }\n        ],\n        \"type_regimes\": [\n            { \"id\": 1, \"name\": \"Responsable de IVA\", \"code\": \"48\" }\n        ],\n        \"type_liabilities\": [\n            { \"id\": 7, \"name\": \"No responsable\", \"code\": \"R-99-PN\" }\n        ],\n        \"municipalities\": [\n            { \"id\": 1, \"name\": \"Bogotá D.C.\", \"code\": \"11001\" }\n        ]\n    }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "2. Registro y Config Empresa DIAN",
+			"item": [
+				{
+					"name": "Registrar Empresa en DIAN",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "X-API-Key", "value": "{{api_key}}" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "X-Company-Name", "value": "Mi Empresa S.A.S", "disabled": true },
+							{ "key": "X-Company-NIT", "value": "900123456", "disabled": true },
+							{ "key": "X-User-Name", "value": "Juan Pérez", "disabled": true },
+							{ "key": "X-User-Email", "value": "admin@empresa.com", "disabled": true }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dian_token\": \"{{dian_token}}\",\n    \"tax_id\": \"900123456\",\n    \"type_document_identification_id\": 6,\n    \"type_organization_id\": 1,\n    \"type_regime_id\": 1,\n    \"type_liability_id\": 7,\n    \"business_name\": \"Mi Empresa S.A.S\",\n    \"merchant_registration\": \"123456\",\n    \"municipality_id\": 1,\n    \"address\": \"Calle 123 #45-67\",\n    \"phone\": \"3001234567\",\n    \"email\": \"facturacion@miempresa.com\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/external/v1/company/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "external", "v1", "company", "register"]
+						},
+						"description": "Registra una empresa ante la DIAN. Guardar el token devuelto en data.token."
+					},
+					"response": [
+						{
+							"name": "Registro exitoso",
+							"status": "OK",
+							"code": 200,
+							"header": [{ "key": "Content-Type", "value": "application/json" }],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Empresa registrada exitosamente en la DIAN\",\n    \"data\": {\n        \"token\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9...\",\n        \"company\": {\n            \"id\": 1,\n            \"identification_number\": \"900123456\",\n            \"name\": \"Mi Empresa S.A.S\"\n        }\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Actualizar Empresa en DIAN",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "X-API-Key", "value": "{{api_key}}" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "X-Company-Name", "value": "Mi Empresa S.A.S", "disabled": true },
+							{ "key": "X-Company-NIT", "value": "900123456", "disabled": true },
+							{ "key": "X-User-Name", "value": "Juan Pérez", "disabled": true },
+							{ "key": "X-User-Email", "value": "admin@empresa.com", "disabled": true }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dian_token\": \"{{dian_token}}\",\n    \"type_organization_id\": 1,\n    \"type_regime_id\": 1,\n    \"type_liability_id\": 7,\n    \"business_name\": \"Mi Empresa S.A.S - Actualizado\",\n    \"merchant_registration\": \"123456\",\n    \"municipality_id\": 1,\n    \"address\": \"Calle Nueva 456 #78-90\",\n    \"phone\": \"3009876543\",\n    \"email\": \"nuevo@miempresa.com\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/external/v1/company/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "external", "v1", "company", "register"]
+						},
+						"description": "Actualiza datos de empresa ya registrada. NIT y tipo documento NO se pueden cambiar."
+					},
+					"response": [
+						{
+							"name": "Actualización exitosa",
+							"status": "OK",
+							"code": 200,
+							"header": [{ "key": "Content-Type", "value": "application/json" }],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Datos actualizados exitosamente en la DIAN\",\n    \"data\": { ... }\n}"
+						}
+					]
+				},
+				{
+					"name": "Configurar Ambiente DIAN",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "X-API-Key", "value": "{{api_key}}" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "X-Company-Name", "value": "Mi Empresa S.A.S", "disabled": true },
+							{ "key": "X-Company-NIT", "value": "900123456", "disabled": true },
+							{ "key": "X-User-Name", "value": "Juan Pérez", "disabled": true },
+							{ "key": "X-User-Email", "value": "admin@empresa.com", "disabled": true }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dian_token\": \"{{dian_token}}\",\n    \"type_environment_id\": 2,\n    \"software_id\": \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\n    \"pin\": \"12345\",\n    \"certificate\": \"base64_del_certificado_digital...\",\n    \"certificate_password\": \"password_del_certificado\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/external/v1/company/environment",
+							"host": ["{{base_url}}"],
+							"path": ["api", "external", "v1", "company", "environment"]
+						},
+						"description": "Configura el ambiente DIAN (pruebas o producción) con el certificado digital.\n\n## Campos\n| Campo | Tipo | Descripción |\n|---|---|---|\n| dian_token | string | Token DIAN de la empresa |\n| type_environment_id | int | 1 = Producción, 2 = Pruebas |\n| software_id | string | ID del software registrado en DIAN |\n| pin | string | PIN del software |\n| certificate | string | Certificado digital en base64 |\n| certificate_password | string | Contraseña del certificado |\n\n## Paso en el flujo de habilitación\nEste endpoint se usa después de registrar la empresa y ANTES de enviar facturas de prueba."
+					},
+					"response": [
+						{
+							"name": "Ambiente configurado",
+							"status": "OK",
+							"code": 200,
+							"header": [{ "key": "Content-Type", "value": "application/json" }],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Ambiente DIAN configurado exitosamente\",\n    \"data\": {\n        \"success\": true,\n        \"message\": \"Ambiente configurado exitosamente\"\n    }\n}"
+						},
+						{
+							"name": "Error - certificado inválido",
+							"status": "Bad Request",
+							"code": 400,
+							"header": [{ "key": "Content-Type", "value": "application/json" }],
+							"body": "{\n    \"success\": false,\n    \"message\": \"Error configurando ambiente DIAN\",\n    \"errors\": {}\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "3. Facturación Electrónica",
+			"item": [
+				{
+					"name": "Enviar Factura a DIAN (con wrapper)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "X-API-Key", "value": "{{api_key}}" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "X-Company-Name", "value": "Mi Empresa S.A.S", "disabled": true },
+							{ "key": "X-Company-NIT", "value": "900123456", "disabled": true },
+							{ "key": "X-User-Name", "value": "Juan Pérez", "disabled": true },
+							{ "key": "X-User-Email", "value": "admin@empresa.com", "disabled": true }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dian_token\": \"{{dian_token}}\",\n    \"test_uuid\": null,\n    \"invoice\": {\n        \"number\": 1,\n        \"sync\": true,\n        \"environment\": {\n            \"type_environment_id\": 2\n        },\n        \"type_document_id\": 1,\n        \"customer\": {\n            \"identification_number\": \"123456789\",\n            \"name\": \"Cliente Ejemplo S.A.S\",\n            \"email\": \"cliente@ejemplo.com\",\n            \"type_document_identification_id\": 6,\n            \"type_organization_id\": 1,\n            \"type_regime_id\": 1,\n            \"type_liabilitie_id\": 7,\n            \"phone\": \"3001234567\",\n            \"address\": \"Calle 100 #15-20\"\n        },\n        \"date\": \"2026-02-10\",\n        \"legal_monetary_totals\": {\n            \"line_extension_amount\": \"100000.00\",\n            \"tax_exclusive_amount\": \"100000.00\",\n            \"tax_inclusive_amount\": \"119000.00\",\n            \"allowance_total_amount\": \"0.00\",\n            \"charge_total_amount\": \"0.00\",\n            \"payable_amount\": \"119000.00\"\n        },\n        \"invoice_lines\": [\n            {\n                \"unit_measure_id\": 642,\n                \"invoiced_quantity\": \"2.000000\",\n                \"line_extension_amount\": \"100000.00\",\n                \"free_of_charge_indicator\": false,\n                \"tax_totals\": [\n                    {\n                        \"tax_id\": 1,\n                        \"tax_amount\": \"19000.00\",\n                        \"taxable_amount\": \"100000.00\",\n                        \"percent\": \"19.00\"\n                    }\n                ],\n                \"description\": \"Consulta veterinaria\",\n                \"code\": \"SRV-001\",\n                \"type_item_identification_id\": 4,\n                \"price_amount\": \"50000.00\",\n                \"base_quantity\": \"1.000000\"\n            }\n        ],\n        \"payment_forms\": [\n            {\n                \"payment_form_id\": 1,\n                \"payment_method_id\": 10\n            }\n        ]\n    }\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/external/v1/invoice",
+							"host": ["{{base_url}}"],
+							"path": ["api", "external", "v1", "invoice"]
+						},
+						"description": "Envía factura electrónica a la DIAN. Payload dentro del campo invoice."
+					},
+					"response": [
+						{
+							"name": "Factura enviada exitosamente",
+							"status": "OK",
+							"code": 200,
+							"header": [{ "key": "Content-Type", "value": "application/json" }],
+							"body": "{\n    \"success\": true,\n    \"is_valid\": true,\n    \"message\": \"Factura electrónica enviada exitosamente a la DIAN\",\n    \"data\": {\n        \"is_valid\": true,\n        \"number\": \"SETP1\",\n        \"uuid\": \"abc123-def456-ghi789\",\n        \"issue_date\": \"2026-02-10\",\n        \"status_description\": \"Procesado Correctamente\",\n        \"status_message\": \"Factura aprobada por la DIAN\",\n        \"qr_link\": \"https://catalogo-vpfe.dian.gov.co/document/searchqr?documentkey=abc123\",\n        \"xml_base64_bytes\": \"PD94bWwg...\",\n        \"pdf_base64_bytes\": \"JVBERi0x...\",\n        \"xml_name\": \"fv_abc123.xml\",\n        \"zip_name\": \"z_abc123.zip\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Enviar Factura a DIAN (raw - sin wrapper)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "X-API-Key", "value": "{{api_key}}" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "X-Company-Name", "value": "Mi Empresa S.A.S", "disabled": true },
+							{ "key": "X-Company-NIT", "value": "900123456", "disabled": true },
+							{ "key": "X-User-Name", "value": "Juan Pérez", "disabled": true },
+							{ "key": "X-User-Email", "value": "admin@empresa.com", "disabled": true }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dian_token\": \"{{dian_token}}\",\n    \"test_uuid\": null,\n    \"number\": 1,\n    \"sync\": true,\n    \"environment\": {\n        \"type_environment_id\": 2\n    },\n    \"type_document_id\": 1,\n    \"customer\": {\n        \"identification_number\": \"123456789\",\n        \"name\": \"Cliente Ejemplo S.A.S\",\n        \"email\": \"cliente@ejemplo.com\",\n        \"type_document_identification_id\": 6,\n        \"type_organization_id\": 1,\n        \"type_regime_id\": 1,\n        \"type_liabilitie_id\": 7\n    },\n    \"date\": \"2026-02-10\",\n    \"legal_monetary_totals\": {\n        \"line_extension_amount\": \"100000.00\",\n        \"tax_exclusive_amount\": \"100000.00\",\n        \"tax_inclusive_amount\": \"119000.00\",\n        \"allowance_total_amount\": \"0.00\",\n        \"charge_total_amount\": \"0.00\",\n        \"payable_amount\": \"119000.00\"\n    },\n    \"invoice_lines\": [\n        {\n            \"unit_measure_id\": 642,\n            \"invoiced_quantity\": \"2.000000\",\n            \"line_extension_amount\": \"100000.00\",\n            \"free_of_charge_indicator\": false,\n            \"tax_totals\": [\n                {\n                    \"tax_id\": 1,\n                    \"tax_amount\": \"19000.00\",\n                    \"taxable_amount\": \"100000.00\",\n                    \"percent\": \"19.00\"\n                }\n            ],\n            \"description\": \"Consulta veterinaria\",\n            \"code\": \"SRV-001\",\n            \"type_item_identification_id\": 4,\n            \"price_amount\": \"50000.00\",\n            \"base_quantity\": \"1.000000\"\n        }\n    ],\n    \"payment_forms\": [\n        {\n            \"payment_form_id\": 1,\n            \"payment_method_id\": 10\n        }\n    ]\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/external/v1/invoice/send-raw",
+							"host": ["{{base_url}}"],
+							"path": ["api", "external", "v1", "invoice", "send-raw"]
+						},
+						"description": "Envía factura sin wrapper. Todo el body (excepto dian_token y test_uuid) se envía directo a la API DIAN."
+					},
+					"response": [
+						{
+							"name": "Factura enviada exitosamente",
+							"status": "OK",
+							"code": 200,
+							"header": [{ "key": "Content-Type", "value": "application/json" }],
+							"body": "{\n    \"success\": true,\n    \"is_valid\": true,\n    \"message\": \"Factura electrónica enviada exitosamente a la DIAN\",\n    \"data\": { \"...misma estructura que /invoice...\" }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "4. Notas Crédito y Débito",
+			"item": [
+				{
+					"name": "Enviar Nota Crédito a DIAN",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "X-API-Key", "value": "{{api_key}}" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "X-Company-Name", "value": "Mi Empresa S.A.S", "disabled": true },
+							{ "key": "X-Company-NIT", "value": "900123456", "disabled": true },
+							{ "key": "X-User-Name", "value": "Juan Pérez", "disabled": true },
+							{ "key": "X-User-Email", "value": "admin@empresa.com", "disabled": true }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dian_token\": \"{{dian_token}}\",\n    \"test_uuid\": null,\n    \"credit_note\": {\n        \"number\": 1,\n        \"type_document_id\": 5,\n        \"billing_reference\": {\n            \"number\": \"SETP1\",\n            \"uuid\": \"uuid-de-la-factura-original\",\n            \"issue_date\": \"2026-02-10\"\n        },\n        \"discrepancy_response\": {\n            \"correction_concept_id\": 2\n        },\n        \"customer\": {\n            \"identification_number\": \"123456789\",\n            \"name\": \"Cliente Ejemplo S.A.S\",\n            \"email\": \"cliente@ejemplo.com\",\n            \"type_document_identification_id\": 6,\n            \"type_organization_id\": 1,\n            \"type_regime_id\": 1,\n            \"type_liabilitie_id\": 7,\n            \"phone\": \"3001234567\",\n            \"address\": \"Calle 100 #15-20\"\n        },\n        \"legal_monetary_totals\": {\n            \"line_extension_amount\": \"50000.00\",\n            \"tax_exclusive_amount\": \"50000.00\",\n            \"tax_inclusive_amount\": \"59500.00\",\n            \"allowance_total_amount\": \"0.00\",\n            \"charge_total_amount\": \"0.00\",\n            \"payable_amount\": \"59500.00\"\n        },\n        \"credit_note_lines\": [\n            {\n                \"unit_measure_id\": 642,\n                \"invoiced_quantity\": \"1.000000\",\n                \"line_extension_amount\": \"50000.00\",\n                \"free_of_charge_indicator\": false,\n                \"tax_totals\": [\n                    {\n                        \"tax_id\": 1,\n                        \"tax_amount\": \"9500.00\",\n                        \"taxable_amount\": \"50000.00\",\n                        \"percent\": \"19.00\"\n                    }\n                ],\n                \"description\": \"Devolución consulta veterinaria\",\n                \"code\": \"SRV-001\",\n                \"type_item_identification_id\": 4,\n                \"price_amount\": \"50000.00\",\n                \"base_quantity\": \"1.000000\"\n            }\n        ]\n    }\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/external/v1/credit-note",
+							"host": ["{{base_url}}"],
+							"path": ["api", "external", "v1", "credit-note"]
+						},
+						"description": "Envía una nota crédito a la DIAN. Anula total o parcialmente una factura.\n\n## Campos clave\n- `type_document_id`: siempre `5` para nota crédito\n- `billing_reference`: datos de la factura que se anula (number, uuid, issue_date)\n- `discrepancy_response.correction_concept_id`: motivo de corrección (2 = anulación)\n- `credit_note_lines`: items de la nota crédito (NO invoice_lines)\n- `legal_monetary_totals`: totales de la nota crédito\n\n## Conceptos de corrección (correction_concept_id)\n| ID | Descripción |\n|---|---|\n| 1 | Devolución parcial de bienes/servicios |\n| 2 | Anulación de factura |\n| 3 | Rebaja o bonificación |\n| 4 | Ajuste de precio |\n| 5 | Otros |"
+					},
+					"response": [
+						{
+							"name": "Nota crédito enviada exitosamente",
+							"status": "OK",
+							"code": 200,
+							"header": [{ "key": "Content-Type", "value": "application/json" }],
+							"body": "{\n    \"success\": true,\n    \"is_valid\": true,\n    \"message\": \"Nota crédito enviada exitosamente a la DIAN\",\n    \"data\": {\n        \"is_valid\": true,\n        \"number\": \"NC1\",\n        \"uuid\": \"nc-uuid-123-456\",\n        \"issue_date\": \"2026-02-10\",\n        \"status_description\": \"Procesado Correctamente\",\n        \"status_message\": \"Nota crédito aprobada\",\n        \"qr_link\": \"https://catalogo-vpfe.dian.gov.co/...\",\n        \"xml_base64_bytes\": \"PD94bWwg...\",\n        \"pdf_base64_bytes\": \"JVBERi0x...\"\n    }\n}"
+						},
+						{
+							"name": "Error - factura referenciada no existe",
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"header": [{ "key": "Content-Type", "value": "application/json" }],
+							"body": "{\n    \"success\": false,\n    \"is_valid\": false,\n    \"message\": \"Error enviando nota crédito a la DIAN\",\n    \"errors_messages\": [\"La factura referenciada no existe\"],\n    \"errors\": {}\n}"
+						}
+					]
+				},
+				{
+					"name": "Enviar Nota Débito a DIAN",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "X-API-Key", "value": "{{api_key}}" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "X-Company-Name", "value": "Mi Empresa S.A.S", "disabled": true },
+							{ "key": "X-Company-NIT", "value": "900123456", "disabled": true },
+							{ "key": "X-User-Name", "value": "Juan Pérez", "disabled": true },
+							{ "key": "X-User-Email", "value": "admin@empresa.com", "disabled": true }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dian_token\": \"{{dian_token}}\",\n    \"test_uuid\": null,\n    \"debit_note\": {\n        \"number\": 1,\n        \"type_document_id\": 6,\n        \"billing_reference\": {\n            \"number\": \"SETP2\",\n            \"uuid\": \"uuid-de-la-factura-original\",\n            \"issue_date\": \"2026-02-10\"\n        },\n        \"discrepancy_response\": {\n            \"correction_concept_id\": 10\n        },\n        \"customer\": {\n            \"identification_number\": \"123456789\",\n            \"name\": \"Cliente Ejemplo S.A.S\",\n            \"email\": \"cliente@ejemplo.com\",\n            \"type_document_identification_id\": 6,\n            \"type_organization_id\": 1,\n            \"type_regime_id\": 1,\n            \"type_liabilitie_id\": 7,\n            \"phone\": \"3001234567\",\n            \"address\": \"Calle 100 #15-20\"\n        },\n        \"requested_monetary_totals\": {\n            \"line_extension_amount\": \"25000.00\",\n            \"tax_exclusive_amount\": \"25000.00\",\n            \"tax_inclusive_amount\": \"29750.00\",\n            \"allowance_total_amount\": \"0.00\",\n            \"charge_total_amount\": \"0.00\",\n            \"payable_amount\": \"29750.00\"\n        },\n        \"debit_note_lines\": [\n            {\n                \"unit_measure_id\": 642,\n                \"invoiced_quantity\": \"1.000000\",\n                \"line_extension_amount\": \"25000.00\",\n                \"free_of_charge_indicator\": false,\n                \"tax_totals\": [\n                    {\n                        \"tax_id\": 1,\n                        \"tax_amount\": \"4750.00\",\n                        \"taxable_amount\": \"25000.00\",\n                        \"percent\": \"19.00\"\n                    }\n                ],\n                \"description\": \"Cargo adicional por servicio especial\",\n                \"code\": \"SRV-002\",\n                \"type_item_identification_id\": 4,\n                \"price_amount\": \"25000.00\",\n                \"base_quantity\": \"1.000000\"\n            }\n        ]\n    }\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/external/v1/debit-note",
+							"host": ["{{base_url}}"],
+							"path": ["api", "external", "v1", "debit-note"]
+						},
+						"description": "Envía una nota débito a la DIAN. Agrega un cargo adicional a una factura existente.\n\n## Diferencias con Nota Crédito\n- `type_document_id`: siempre `6` para nota débito\n- Usa `debit_note_lines` (NO credit_note_lines ni invoice_lines)\n- Usa `requested_monetary_totals` (NO legal_monetary_totals)\n- `correction_concept_id`: `10` = intereses, `11` = gastos por cobrar\n\n## Conceptos de corrección (correction_concept_id)\n| ID | Descripción |\n|---|---|\n| 10 | Intereses |\n| 11 | Gastos por cobrar |\n| 12 | Cambio del valor |\n| 13 | Otros |"
+					},
+					"response": [
+						{
+							"name": "Nota débito enviada exitosamente",
+							"status": "OK",
+							"code": 200,
+							"header": [{ "key": "Content-Type", "value": "application/json" }],
+							"body": "{\n    \"success\": true,\n    \"is_valid\": true,\n    \"message\": \"Nota débito enviada exitosamente a la DIAN\",\n    \"data\": {\n        \"is_valid\": true,\n        \"number\": \"ND1\",\n        \"uuid\": \"nd-uuid-123-456\",\n        \"issue_date\": \"2026-02-10\",\n        \"status_description\": \"Procesado Correctamente\",\n        \"status_message\": \"Nota débito aprobada\",\n        \"qr_link\": \"https://catalogo-vpfe.dian.gov.co/...\",\n        \"xml_base64_bytes\": \"PD94bWwg...\",\n        \"pdf_base64_bytes\": \"JVBERi0x...\"\n    }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "5. Tests de Autenticación",
+			"item": [
+				{
+					"name": "Sin API Key (debe dar 401)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/external/v1/catalogs",
+							"host": ["{{base_url}}"],
+							"path": ["api", "external", "v1", "catalogs"]
+						},
+						"description": "Prueba sin header X-API-Key → debe dar 401."
+					},
+					"response": [
+						{
+							"name": "401 - Sin API key",
+							"status": "Unauthorized",
+							"code": 401,
+							"header": [{ "key": "Content-Type", "value": "application/json" }],
+							"body": "{\n    \"success\": false,\n    \"message\": \"API key requerida. Envíe el header X-API-Key.\"\n}"
+						}
+					]
+				},
+				{
+					"name": "API Key inválida (debe dar 401)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-API-Key", "value": "sk_token_que_no_existe_12345" },
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/external/v1/catalogs",
+							"host": ["{{base_url}}"],
+							"path": ["api", "external", "v1", "catalogs"]
+						},
+						"description": "Prueba con API key inválido → debe dar 401."
+					},
+					"response": [
+						{
+							"name": "401 - API key inválida",
+							"status": "Unauthorized",
+							"code": 401,
+							"header": [{ "key": "Content-Type", "value": "application/json" }],
+							"body": "{\n    \"success\": false,\n    \"message\": \"API key inválida.\"\n}"
+						}
+					]
+				}
+			]
+		}
+	]
+}

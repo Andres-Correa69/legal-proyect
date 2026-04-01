@@ -1,0 +1,553 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.tsx';
+@source '../**/*.ts';
+
+/*
+ * Theme overrides - border-radius to match vet-dash-vibe (Tailwind v3 config)
+ * Vet-dash uses --radius: 0.75rem with lg/md/sm derived from it
+ */
+@theme {
+    /* Font Family - match vet-dash-vibe (Tailwind v3 full font stack) */
+    --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+    /* Border Radius - match vet-dash-vibe (Tailwind v3 config with --radius: 0.75rem) */
+    --radius-sm: calc(0.75rem - 4px);
+    --radius-md: calc(0.75rem - 2px);
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+
+    /* Colors - defined via --color-* so Tailwind generates bg-*, text-*, border-*
+       utilities WITH opacity modifier support (e.g. bg-primary/10) */
+    --color-background: hsl(var(--background));
+    --color-foreground: hsl(var(--foreground));
+
+    --color-card: hsl(var(--card));
+    --color-card-foreground: hsl(var(--card-foreground));
+
+    --color-popover: hsl(var(--popover));
+    --color-popover-foreground: hsl(var(--popover-foreground));
+
+    --color-primary: hsl(var(--primary));
+    --color-primary-foreground: hsl(var(--primary-foreground));
+
+    --color-secondary: hsl(var(--secondary));
+    --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+    --color-muted: hsl(var(--muted));
+    --color-muted-foreground: hsl(var(--muted-foreground));
+
+    --color-accent: hsl(var(--accent));
+    --color-accent-foreground: hsl(var(--accent-foreground));
+
+    --color-destructive: hsl(var(--destructive));
+    --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+    --color-success: hsl(var(--success));
+    --color-success-foreground: hsl(var(--success-foreground));
+
+    --color-warning: hsl(var(--warning));
+    --color-warning-foreground: hsl(var(--warning-foreground));
+
+    --color-info: hsl(var(--info));
+    --color-info-foreground: hsl(var(--info-foreground));
+
+    --color-border: hsl(var(--border));
+    --color-input: hsl(var(--input));
+    --color-ring: hsl(var(--ring));
+}
+
+/*
+ * Design System - Variables CSS en HSL
+ * Copiado exactamente de vet-dash-vibe
+ */
+
+:root {
+    /* Base Colors */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
+
+    /* Status Colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+
+    /* Radius */
+    --radius: 0.75rem;
+
+    /* Shadows */
+    --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-medium: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-large: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+    /* Transition */
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Sidebar Colors */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Billing Theme Colors - Azul Legal Sistema (marca) */
+    --billing-primary: 207 72% 31%;
+    --billing-primary-foreground: 0 0% 100%;
+    --billing-accent: 202 56% 52%;
+    --billing-accent-foreground: 0 0% 100%;
+    --billing-background: 205 15% 98%;
+    --billing-border: 205 20% 90%;
+
+    /* Workshop Theme Colors - Purple/Blue */
+    --workshop-primary: 258 55% 52%;
+    --workshop-primary-foreground: 0 0% 100%;
+    --workshop-accent: 220 60% 50%;
+    --workshop-accent-foreground: 0 0% 100%;
+    --workshop-background: 245 20% 98%;
+    --workshop-border: 245 15% 88%;
+    --workshop-muted: 258 25% 94%;
+
+    /* Medical Theme Colors - Teal/Cyan */
+    --medical-primary: 174 72% 40%;
+    --medical-primary-foreground: 0 0% 100%;
+    --medical-accent: 199 89% 48%;
+    --medical-accent-foreground: 0 0% 100%;
+    --medical-background: 180 10% 98%;
+    --medical-border: 174 20% 90%;
+
+    /* Accounting Theme Colors - Purple */
+    --accounting-primary: 271 81% 56%;
+    --accounting-primary-foreground: 0 0% 100%;
+    --accounting-accent: 280 68% 60%;
+    --accounting-accent-foreground: 0 0% 100%;
+    --accounting-background: 270 10% 98%;
+    --accounting-border: 271 20% 90%;
+}
+
+/* ============================================
+   Theme Color Palettes (light mode only)
+   Blue is the default — no class needed
+   ============================================ */
+
+.theme-green {
+    --billing-primary: 152 69% 31%;
+    --billing-primary-foreground: 0 0% 100%;
+    --billing-accent: 142 64% 42%;
+    --billing-accent-foreground: 0 0% 100%;
+    --billing-background: 150 15% 98%;
+    --billing-border: 150 20% 90%;
+}
+
+.theme-orange {
+    --billing-primary: 24 80% 44%;
+    --billing-primary-foreground: 0 0% 100%;
+    --billing-accent: 32 75% 55%;
+    --billing-accent-foreground: 0 0% 100%;
+    --billing-background: 28 15% 98%;
+    --billing-border: 28 20% 90%;
+}
+
+.theme-red {
+    --billing-primary: 0 65% 40%;
+    --billing-primary-foreground: 0 0% 100%;
+    --billing-accent: 4 58% 52%;
+    --billing-accent-foreground: 0 0% 100%;
+    --billing-background: 0 15% 98%;
+    --billing-border: 0 20% 90%;
+}
+
+.theme-gray {
+    --billing-primary: 215 20% 35%;
+    --billing-primary-foreground: 0 0% 100%;
+    --billing-accent: 215 16% 47%;
+    --billing-accent-foreground: 0 0% 100%;
+    --billing-background: 215 10% 98%;
+    --billing-border: 215 15% 90%;
+}
+
+.theme-brown {
+    --billing-primary: 25 40% 32%;
+    --billing-primary-foreground: 0 0% 100%;
+    --billing-accent: 25 35% 45%;
+    --billing-accent-foreground: 0 0% 100%;
+    --billing-background: 25 12% 98%;
+    --billing-border: 25 18% 90%;
+}
+
+.theme-yellow {
+    --billing-primary: 40 75% 38%;
+    --billing-primary-foreground: 0 0% 100%;
+    --billing-accent: 45 70% 50%;
+    --billing-accent-foreground: 0 0% 100%;
+    --billing-background: 42 15% 98%;
+    --billing-border: 42 20% 90%;
+}
+
+.theme-pink {
+    --billing-primary: 330 65% 40%;
+    --billing-primary-foreground: 0 0% 100%;
+    --billing-accent: 338 58% 55%;
+    --billing-accent-foreground: 0 0% 100%;
+    --billing-background: 332 15% 98%;
+    --billing-border: 332 20% 90%;
+}
+
+/* Remove theme overrides in dark mode */
+.dark.theme-green,
+.dark.theme-orange,
+.dark.theme-red,
+.dark.theme-gray,
+.dark.theme-brown,
+.dark.theme-yellow,
+.dark.theme-pink {
+    --billing-primary: 207 72% 45%;
+    --billing-primary-foreground: 0 0% 100%;
+    --billing-accent: 202 56% 60%;
+    --billing-accent-foreground: 0 0% 100%;
+    --billing-background: 222 47% 13%;
+    --billing-border: 217 25% 22%;
+}
+
+/* Dark Mode */
+.dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 217 33% 17%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 25% 22%;
+    --ring: 221 83% 53%;
+
+    /* Shadows Dark */
+    --shadow-soft: 0 2px 8px 0 rgb(0 0 0 / 0.3);
+    --shadow-medium: 0 4px 12px -2px rgb(0 0 0 / 0.4);
+    --shadow-large: 0 8px 24px -4px rgb(0 0 0 / 0.5);
+
+    /* Status Colors Dark */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+
+    /* Sidebar Dark */
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Billing Theme Dark - Azul Legal Sistema */
+    --billing-primary: 207 72% 42%;
+    --billing-primary-foreground: 0 0% 100%;
+    --billing-accent: 202 56% 60%;
+    --billing-accent-foreground: 0 0% 100%;
+    --billing-background: 207 15% 10%;
+    --billing-border: 207 20% 25%;
+
+    /* Workshop Theme Dark */
+    --workshop-primary: 258 55% 62%;
+    --workshop-primary-foreground: 0 0% 100%;
+    --workshop-accent: 220 60% 58%;
+    --workshop-accent-foreground: 0 0% 100%;
+    --workshop-background: 245 20% 10%;
+    --workshop-border: 245 15% 22%;
+    --workshop-muted: 258 25% 18%;
+
+    /* Medical Theme Dark */
+    --medical-primary: 174 72% 50%;
+    --medical-primary-foreground: 0 0% 100%;
+    --medical-accent: 199 89% 58%;
+    --medical-accent-foreground: 0 0% 100%;
+    --medical-background: 180 10% 10%;
+    --medical-border: 174 20% 25%;
+
+    /* Accounting Theme Dark */
+    --accounting-primary: 271 81% 65%;
+    --accounting-primary-foreground: 0 0% 100%;
+    --accounting-accent: 280 68% 65%;
+    --accounting-accent-foreground: 0 0% 100%;
+    --accounting-background: 270 10% 10%;
+    --accounting-border: 271 20% 25%;
+}
+
+/* Base Styles */
+@layer base {
+    * {
+        border-color: hsl(var(--border));
+    }
+}
+
+body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Smooth theme transition - solo para colores, no para layout */
+*:not(aside):not(header):not(main):not(.transition-all):not([class*="lg:ml-"]):not([class*="lg:left-"]):not([class*="lg:w-"]),
+*::before,
+*::after {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.15s ease;
+}
+
+/* Transiciones para el layout del sidebar */
+aside,
+header,
+main,
+[class*="lg:ml-"],
+.transition-all {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark mode specific styles */
+.dark .border {
+    border-color: hsl(217 33% 17%);
+}
+
+.dark header,
+.dark aside {
+    border-color: hsl(217 25% 20%);
+}
+
+.dark [class*="Card"],
+.dark .bg-card {
+    box-shadow: 0 2px 12px 0 rgb(0 0 0 / 0.4), 0 1px 4px -1px rgb(0 0 0 / 0.3);
+}
+
+/* Stronger shadows in dark mode for all Tailwind shadow utilities */
+.dark .shadow-sm {
+    box-shadow: 0 2px 6px 0 rgb(0 0 0 / 0.35), 0 1px 3px -1px rgb(0 0 0 / 0.25) !important;
+}
+.dark .shadow,
+.dark .shadow-md {
+    box-shadow: 0 4px 12px -1px rgb(0 0 0 / 0.45), 0 2px 6px -2px rgb(0 0 0 / 0.35) !important;
+}
+.dark .shadow-lg {
+    box-shadow: 0 8px 20px -3px rgb(0 0 0 / 0.5), 0 4px 8px -4px rgb(0 0 0 / 0.4) !important;
+}
+.dark .shadow-xl {
+    box-shadow: 0 16px 32px -5px rgb(0 0 0 / 0.55), 0 8px 12px -6px rgb(0 0 0 / 0.45) !important;
+}
+.dark .shadow-2xl {
+    box-shadow: 0 24px 48px -8px rgb(0 0 0 / 0.6) !important;
+}
+
+/* Autofill inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px hsl(var(--background)) inset !important;
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+}
+
+/* ============================================
+   KEYFRAMES - Animaciones
+   ============================================ */
+
+@keyframes accordion-down {
+    from { height: 0; opacity: 0; }
+    to { height: var(--radix-accordion-content-height); opacity: 1; }
+}
+
+@keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height); opacity: 1; }
+    to { height: 0; opacity: 0; }
+}
+
+@keyframes fade-in {
+    0% { opacity: 0; transform: translateY(-4px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes scale-in {
+    0% { opacity: 0; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slide-in-from-top {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-from-bottom {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-from-left {
+    0% { opacity: 0; transform: translateX(-100%); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes page-slide-in {
+    0% { opacity: 0; transform: translateX(-20px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-out-to-left {
+    0% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(-100%); }
+}
+
+@keyframes slide-in-from-right {
+    0% { opacity: 0; transform: translateX(100%); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-out-to-right {
+    0% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(100%); }
+}
+
+@keyframes section-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--section-color), 0.4); }
+    50% { transform: scale(1.005); box-shadow: 0 0 0 8px rgba(var(--section-color), 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--section-color), 0); }
+}
+
+@keyframes section-fade {
+    from { opacity: 0.7; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Landing page animations */
+@keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-33.333%); }
+}
+
+@keyframes scroll-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-33.333%); }
+}
+
+@keyframes scroll-right {
+    0% { transform: translateX(-33.333%); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes whatsapp-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+    50% { box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); }
+}
+
+/* ============================================
+   UTILITY CLASSES - Tailwind CSS 4
+   ============================================ */
+
+/* Ring offset - kept as @utility since it uses a non-standard Tailwind internal property */
+@utility ring-ring { --tw-ring-color: hsl(var(--ring)); }
+@utility ring-offset-background { --tw-ring-offset-color: hsl(var(--background)); }
+
+/* Animations */
+@utility animate-accordion-down { animation: accordion-down 0.2s ease-out; }
+@utility animate-accordion-up { animation: accordion-up 0.2s ease-out; }
+@utility animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
+@utility animate-page-slide-in { animation: page-slide-in 0.3s ease-out backwards; }
+@utility animate-fade-out { animation: fade-out 0.2s ease-out; }
+@utility animate-scale-in { animation: scale-in 0.15s ease-out; }
+@utility animate-slide-in-from-top { animation: slide-in-from-top 0.2s ease-out; }
+@utility animate-slide-in-from-bottom { animation: slide-in-from-bottom 0.2s ease-out; }
+@utility animate-slide-in-from-left { animation: slide-in-from-left 0.25s ease-out; }
+@utility animate-slide-out-to-left { animation: slide-out-to-left 0.25s ease-out; }
+@utility animate-slide-in-from-right { animation: slide-in-from-right 0.25s ease-out; }
+@utility animate-slide-out-to-right { animation: slide-out-to-right 0.25s ease-out; }
+@utility animate-section-pulse { animation: section-pulse 0.6s ease-out; }
+@utility animate-section-fade { animation: section-fade 0.4s ease-out forwards; }
+
+/* Backdrop Blur */
+@utility backdrop-blur-xs { backdrop-filter: blur(2px); }
+@utility backdrop-blur-sm { backdrop-filter: blur(4px); }
+@utility backdrop-blur { backdrop-filter: blur(8px); }
+@utility backdrop-blur-md { backdrop-filter: blur(12px); }
+@utility backdrop-blur-lg { backdrop-filter: blur(16px); }
+@utility backdrop-blur-xl { backdrop-filter: blur(24px); }
+
+/* Section Utilities */
+@utility section-animate {
+    transition-property: all;
+    transition-duration: 500ms;
+    transition-timing-function: ease-out;
+}
+
+@utility section-highlight { animation: section-pulse 0.6s ease-out; }
+@utility section-fade-in { animation: section-fade 0.4s ease-out forwards; }
+
+/* Hide scrollbar utility */
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
